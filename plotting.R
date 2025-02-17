@@ -8,10 +8,10 @@ library(dplyr)
 library(ggplot2)
 
 #save a numerical value
-y <- 5+5
+q <- 5+5
 
 #The answer should print 10
-print(y)
+print(q)
 
 #save a list 
 x <- c(1,2,4,5,7,7,8)
@@ -30,12 +30,38 @@ df$x <- c(5,3,6,7,7,2,1)
 ncol(USArrests)
 nrow(USArrests)
 head(USArrests, 6)
-rowname(USArrests)
+rownames(USArrests)
 colnames(USArrests)
 #For background on the data and units:
 #help(USArrests)
-#boox plot to see the spread of the data
-ggplot(data = USArrests,
-       aes(x=Murder, y=Rape)
-)+ geom_point()
+#box plot to see the spread of the data
+arrests <- ggplot(data = USArrests,
+       aes(x=UrbanPop, y=Rape)
+)+ geom_point()+geom_abline()
+print(arrests)
 #time to go play melee 9:11 PM Valentine's Day!
+#let's see if we can make a line of best fit for the data
+#Predict rapes based on urban population
+is.matrix(USArrests)
+x_observed <- matrix(c(replicate(50,1), USArrests$UrbanPop), 50, 2)
+y_observed <- matrix(USArrests$Rape, 50, 1)
+
+#solve for b1 and b0 in y = b0+b1x
+b_predicted <- solve(t(x_observed)%*%x_observed)%*%t(x_observed)%*%y_observed
+x <- c(1:100) %>%
+y <- b_predicted[1,1]*x+b_predicted[2,1]
+arrest_data <- tibble(x,y)
+predicted_arrests <- ggplot(data=arrest_data,
+       mapping = aes(x="UrbanPop",y="Arrests"))+
+  geom_line()
+print(predicted_arrests)
+
+
+
+####show both on one graph
+plot(USArrests$UrbanPop, USArrests$Rape)
+xlim(0,100)
+ylim(0,max(USArrests$Rape))
+lines(x=USArrests$UrbanPop, y=b_predicted[1,1]*USArrests$UrbanPop+b_predicted[2,1],
+      col="blue",
+      lwd=2)
